@@ -1,9 +1,12 @@
 package ma.showmaker.todo.controller;
 
 import ma.showmaker.todo.domain.ToDo;
+import ma.showmaker.todo.domain.ToDoBuilder;
 import ma.showmaker.todo.repository.CommonRepository;
+import ma.showmaker.todo.validation.ToDoValidationError;
 import ma.showmaker.todo.validation.TodoValidationErrorBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -54,5 +57,17 @@ public class TodoController {
         path("/{id}")
                 .buildAndExpand(result.getId()).toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @DeleteMapping("/todo/{id}")
+    public ResponseEntity<ToDo> deleteTodo(@PathVariable String id){
+        repo.delete(ToDoBuilder.create().withId(id).build());
+        return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ToDoValidationError handleException(Exception exception){
+        return new ToDoValidationError(exception.getMessage());
     }
 }
